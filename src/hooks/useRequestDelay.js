@@ -37,6 +37,9 @@ const useRequestDelay = ( delayTime = 1000, initialData = [] ) => {
 
   
   const updateRecord = ( recordUpdated, doneCallback ) => {
+
+    const originalRecords = [ ...data ];
+
     const newRecords = data.map( rec => {
       return rec.id === recordUpdated.id ? recordUpdated : rec;
     });
@@ -45,11 +48,17 @@ const useRequestDelay = ( delayTime = 1000, initialData = [] ) => {
       try {
         await delay( delayTime );
         if ( doneCallback ) doneCallback();
-        
+
         setData( newRecords );
 
       } catch (error) {
         console.log(error);
+
+        if (doneCallback) {
+          doneCallback();
+        }
+
+        setData(originalRecords);
       }
     }
 
