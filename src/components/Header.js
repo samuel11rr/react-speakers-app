@@ -4,7 +4,7 @@ const Header = ({ theme }) => {
       <div className="container mobile-container">
         <div className="d-flex justify-content-between">
           <div>
-            <img alt="SVCC Home Page" src="/images/SVCCLogo.png" />
+            <img alt="SVCC Home Page" src="/images/logo.png" />
           </div>
 
           <div className="light">

@@ -1,38 +1,53 @@
 import Speaker from "./Speaker"
-import { data } from "../../SpeakerData";
-import { useState } from "react";
+import ReactPlaceholder from "react-placeholder/lib";
+import useRequestDelay, { REQUEST_STATUS } from "../hooks/useRequestDelay";
+import { data } from '../../SpeakerData';
+
 
 const SpeakersList = ({ showSessions }) => {
 
-  const [speakersData, setSpeakersData] = useState(data);
+  const {
+    data: speakersData,
+    requestStatus,
+    error,
+    updateRecord
+  } = useRequestDelay( 2000, data );
+  
 
-  const onFavoriteToggle = (id) => {
-    const speakerRecPrevious = speakersData.find( rec => rec.id === id );
-
-    const speakerRecUpdated = {
-      ...speakerRecPrevious,
-      favorite: !speakerRecPrevious.favorite
-    }
-
-    const speakersDataNew = speakersData.map( rec => rec.id === id ? speakerRecUpdated : rec );
-
-    setSpeakersData( speakersDataNew );
+  if ( requestStatus === REQUEST_STATUS.FAILURE ) {
+    return (
+      <div className="text-danger">
+        ERROR: <b> loading speaker data failed { error } </b>
+      </div>
+    )
   }
 
   return (
     <div className="container speakers-list">
-      <div className="row">
-        {
-          speakersData.map( speaker => (
-            <Speaker 
-              key={ speaker.id }
-              speaker={ speaker }
-              showSessions={ showSessions }
-              onFavoriteToggle={ () => onFavoriteToggle(speaker.id) }
-            />
-          ))
-        }
-      </div>
+      <ReactPlaceholder
+        type="media"
+        rows={ 15 }
+        className="speakerslist-placeholder"
+        ready={ requestStatus === REQUEST_STATUS.SUCCESS }
+      >
+        <div className="row">
+          {
+            speakersData.map( speaker => (
+              <Speaker 
+                key={ speaker.id }
+                speaker={ speaker }
+                showSessions={ showSessions }
+                onFavoriteToggle={ ( doneCallback ) => {
+                  updateRecord({
+                    ...speaker,
+                    favorite: !speaker.favorite
+                  }, doneCallback)
+                }}
+              />
+            ))
+          }
+        </div>
+      </ReactPlaceholder>
     </div>
   )
 }
