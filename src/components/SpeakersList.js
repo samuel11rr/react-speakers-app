@@ -2,9 +2,11 @@ import Speaker from "./Speaker"
 import ReactPlaceholder from "react-placeholder/lib";
 import useRequestDelay, { REQUEST_STATUS } from "../hooks/useRequestDelay";
 import { data } from '../../SpeakerData';
+import { SpeakerFilterContext } from "../contexts/SpeakerFilterContext";
+import { useContext } from "react";
 
 
-const SpeakersList = ({ showSessions }) => {
+const SpeakersList = () => {
 
   const {
     data: speakersData,
@@ -12,7 +14,8 @@ const SpeakersList = ({ showSessions }) => {
     error,
     updateRecord
   } = useRequestDelay( 2000, data );
-  
+
+  const { searchQuery, eventYear } = useContext( SpeakerFilterContext );
 
   if ( requestStatus === REQUEST_STATUS.FAILURE ) {
     return (
@@ -32,19 +35,26 @@ const SpeakersList = ({ showSessions }) => {
       >
         <div className="row">
           {
-            speakersData.map( speaker => (
-              <Speaker 
-                key={ speaker.id }
-                speaker={ speaker }
-                showSessions={ showSessions }
-                onFavoriteToggle={ ( doneCallback ) => {
-                  updateRecord({
-                    ...speaker,
-                    favorite: !speaker.favorite
-                  }, doneCallback)
-                }}
-              />
-            ))
+            speakersData
+              .filter( speaker => (
+                speaker.first.toLowerCase().includes( searchQuery ) ||
+                speaker.last.toLowerCase().includes( searchQuery )
+              ))
+              .filter( speaker => (
+                speaker.sessions.find( session => session.eventYear === eventYear )
+              ))
+              .map( speaker => (
+                <Speaker 
+                  key={ speaker.id }
+                  speaker={ speaker }
+                  onFavoriteToggle={ ( doneCallback ) => {
+                    updateRecord({
+                      ...speaker,
+                      favorite: !speaker.favorite
+                    }, doneCallback)
+                  }}
+                />
+              ))
           }
         </div>
       </ReactPlaceholder>
